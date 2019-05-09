@@ -14,7 +14,7 @@ n_encode = 64
 n_l = 10
 n_z = 50
 img_size = 128
-batchSize = 20
+# batchSize = 20
 use_cuda = torch.cuda.is_available()
 n_age = int(n_z/n_l)
 n_gender = int(n_z/2)
@@ -169,8 +169,14 @@ class Self_Attn(nn.Module):
                 attention: B X N X N (N is Width*Height)
         """
         m_batchsize,C,width ,height = x.size()
-        proj_query  = self.query_conv(x).view(m_batchsize,-1,width*height).permute(0,2,1) # B X CX(N)
-        proj_key =  self.key_conv(x).view(m_batchsize,-1,width*height) # B X C x (*W*H)
+        proj_query  = self.query_conv(x)
+        #print(proj_query.size())
+        proj_query = proj_query.view(m_batchsize,-1,width*height).permute(0,2,1) # B X CX(N)
+        #print(proj_query.size())
+        proj_key =  self.key_conv(x)
+        #print(proj_key.size())
+        proj_key = proj_key.view(m_batchsize,-1,width*height) # B X C x (*W*H)
+        #print(proj_key.size())
         energy =  torch.bmm(proj_query,proj_key) # transpose check
         attention = self.softmax(energy) # BX (N) X (N) 
         proj_value = self.value_conv(x).view(m_batchsize,-1,width*height) # B X C X N
@@ -207,11 +213,11 @@ class Generator(nn.Module):
 
         self.upconv2 = nn.Sequential(
             nn.ConvTranspose2d(2*n_gen,n_gen,4,2,1),
-            nn.ReLU(),
-
+            nn.ReLU(),)
+        
+        self.upconv3 = nn.Sequential(
             nn.ConvTranspose2d(n_gen,n_channel,3,1,1),
             nn.Tanh(),
-
         )
 
         self.Attn1 = Self_Attn(128, 'relu')
@@ -227,8 +233,9 @@ class Generator(nn.Module):
         fc = self.fc(x).view(-1,16*n_gen,8,8)
         out = self.upconv1(fc)
         out,_ = self.Attn1(out)
-        print(out.size())
         out = self.upconv2(out)
+        out,_ =self.Attn2(out)
+        out = self.upconv3(out)
         return out
 
 

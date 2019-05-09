@@ -21,13 +21,14 @@ print('----------------------------------------')
 
 ## boolean variable indicating whether cuda is available
 use_cuda = torch.cuda.is_available()
-print("use_cuda availability: %s"%use_cuda)
+# use_cuda=False
+print("use_cuda: %s"%use_cuda)
 
 makeDir()
 moveFiles()
 
 
-dataloader = loadImgs(batchSize=8)
+dataloader = loadImgs(batchSize=1)
 
 ## build model and use cuda if available
 if use_cuda:
@@ -93,7 +94,8 @@ for epoch in range(niter):
     for i,(img_data,img_label) in enumerate(dataloader): 
 
         # make image variable and class variable
-
+        # if i%10 ==0:
+        print(i)
         img_data_v = Variable(img_data)
         img_age = img_label/2
         img_gender = img_label%2*2-1
