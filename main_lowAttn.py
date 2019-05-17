@@ -153,9 +153,11 @@ for epoch in range(niter):
         z = netE(img_data_v)
         reconst = netG(z,age_ohe,img_gender_v)
         EG_L1_loss = L1(reconst,img_data_v)
-        img_fm = Variable(feature_extractor(img_data_v))
-        reconst_fm = Variable(feature_extractor(reconst))
-        VGG_L1_loss = L1(img_fm, reconst_fm)
+        img_fm,_ = feature_extractor(img_data_v)
+        img_fm_v = Variable(img_fm)
+        reconst_fm, _ = feature_extractor(reconst)
+        reconst_fm_v = Variable(reconst_fm)
+        VGG_L1_loss = L1(img_fm_v, reconst_fm_v)
 
         # EG_loss 2. GAN loss - image
         z = netE(img_data_v)
